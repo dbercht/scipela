@@ -72,17 +72,17 @@ case class Pipeline (val jobMap: Map[String, Job],val linkMap: Map[String, List[
 object Pipeline {
 
 
-  def buildFromLinks(links: List[Link], head:Job): Pipeline = {
-    val linkMap = links.map( f => (f.job.name -> f.nextJobs.map( x => (x._1, x._2.name )))).toMap
-    val jobMap = links.foldLeft(
-      links.map( f => (f.job.name -> f.job))
-    ){ (a, b) =>
-      b.nextJobs.map ( x =>
-         (x._2.name -> x._2 )
-     ) ++ a
-    }.toMap
-    Pipeline(jobMap, linkMap, head)
-  }
+//  def buildFromLinks(links: List[Link], head:Job): Pipeline = {
+//    val linkMap = links.map( f => (f.job.name -> f.nextJobs.map( x => (x._1, x._2 )))).toMap
+//    val jobMap = links.foldLeft(
+//      links.map( f => (f.job.name -> f.job))
+//    ){ (a, b) =>
+//      b.nextJobs.map ( x =>
+//         (x._2.name -> x._2 )
+//     ) ++ a
+//    }.toMap
+//    Pipeline(jobMap, linkMap, head)
+//  }
 
   def process(pipeline: Pipeline, load: Int => Int) : Timeline = {
     var t = new Timeline(pipeline.jobMap.map(f => f._2.name).toSeq);
@@ -91,7 +91,7 @@ object Pipeline {
 
     def processRec(pipeline: Pipeline, r: Int) :Pipeline =  {
       if (r == Config.pipelineEndtime) {
-        return pipeline.tick.tock
+        return pipeline.tock.tick
       }
       val currLoad = load(r);
       t.register(r, pipeline.jobMap.map(f => (f._2.name -> f._2.queue.currentSize)).toMap);

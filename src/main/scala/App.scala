@@ -7,30 +7,30 @@ object Simulator {
   def makePipeline():Pipeline = {
     //val fraudJenkinsJob = Job.create()
 
-    val fraudJenkinsJob = Job.fromConfig("fraud_jenkins", Config.numJenkinsWorkers, Config.jenkinsWorkerProcessingTime, Config.jenkinsDelay, 0)
-    val fraudStormJob = Job.fromConfig("fraud_storm", Config.numFraudWorkers, Config.fraudProcessingTime, 0)
-
-    val asJenkinsJob = Job.fromConfig("as_jenkins", Config.numJenkinsWorkers, Config.jenkinsWorkerProcessingTime, Config.jenkinsDelay, 0)
-    val asStormJob = Job.fromConfig("as_storm", Config.numAssignSupplierWorkers, Config.assignSupplierProcessingTime, 0)
-
-    val csJenkinsJob = Job.fromConfig("cs_jenkins", Config.numJenkinsWorkers, Config.jenkinsWorkerProcessingTime, Config.jenkinsDelay, 0)
-    val csStormJob = Job.fromConfig("cs_storm", Config.numConsolidateShippingWorkers, Config.consolidateShippingProcessingTime, 0)
-
-    val apoJenkinsJob = Job.fromConfig("apo_jenkins", Config.numJenkinsWorkers, Config.jenkinsWorkerProcessingTime, Config.jenkinsDelay, 0)
-    val apoJob = Job.fromConfig("apo_job", 1, Config.apoJobProcessingTime, 0)
-    val apoStorm = Job.fromConfig("apo_storm", Config.numApoWorkers, Config.apoProcessingTime, 0)
-
-
-    val links = List(
-      Link(fraudJenkinsJob, List((.2f -> asJenkinsJob), (.8f -> fraudStormJob))),
-      Link(fraudStormJob, List((1f -> asJenkinsJob), (0f -> asStormJob))),
-      Link(asJenkinsJob, List(1f -> asStormJob)),
-      Link(asStormJob, List(1f -> csStormJob)),
-      Link(csStormJob, List(1f -> apoJenkinsJob)),
-      Link(apoJenkinsJob, List(1f -> apoJob))
+    val jobs = Map(
+      "fraud_jenkins" -> Job.fromConfig("fraud_jenkins", Config.numJenkinsWorkers, Config.jenkinsWorkerProcessingTime, Config.jenkinsDelay, 0),
+      "fraud_storm" -> Job.fromConfig("fraud_storm", Config.numFraudWorkers, Config.fraudProcessingTime, 0),
+      "as_jenkins" -> Job.fromConfig("as_jenkins", Config.numJenkinsWorkers, Config.jenkinsWorkerProcessingTime, Config.jenkinsDelay, 0),
+      "as_storm" -> Job.fromConfig("as_storm", Config.numAssignSupplierWorkers, Config.assignSupplierProcessingTime, 0, 0),
+      "cs_jenkins" -> Job.fromConfig("cs_jenkins", Config.numJenkinsWorkers, Config.jenkinsWorkerProcessingTime, Config.jenkinsDelay, 0),
+      "cs_storm" -> Job.fromConfig("cs_storm", Config.numConsolidateShippingWorkers, Config.consolidateShippingProcessingTime, 0),
+      "apo_jenkins" -> Job.fromConfig("apo_jenkins", Config.numJenkinsWorkers, Config.jenkinsWorkerProcessingTime, Config.jenkinsDelay, 0),
+      "apo_job" -> Job.fromConfig("apo_job", 1, Config.apoJobProcessingTime, 0),
+      "apo_storm" -> Job.fromConfig("apo_storm", Config.numApoWorkers, Config.apoProcessingTime, 0)
     )
 
-    Pipeline.buildFromLinks(links, fraudJenkinsJob)
+    val links = Map[String, List[(Float, String)]](
+      "fraud_jenkins" -> List((.2f -> "as_jenkins"), (.8f -> "fraud_storm")),
+      "fraud_storm" -> List((0f -> "as_jenkins"), (1f -> "as_storm")),
+      "as_jenkins" -> List(1f -> "as_storm"),
+//      "as_storm" -> List(1f -> "cs_jenkins"),
+      "as_storm" -> List(1f -> "cs_storm"),
+      //      "cs_jenkins" -> List(1f -> "cs_storm"),
+      "cs_storm" -> List(1f -> "apo_storm"),
+      "apo_jenkins" -> List(1f -> "apo_storm")
+    )
+
+    Pipeline(jobs, links, jobs.get("fraud_storm").get )
   }
 
 
