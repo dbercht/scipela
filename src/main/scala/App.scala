@@ -1,40 +1,52 @@
 package main.scala
-import simulator.entities._
+import simulator._
+import java.util.Random
 
 object Simulator {
 
   def makePipeline():Pipeline = {
-    val emptyQ = Queue(0)
+    //val fraudJenkinsJob = Job.create()
 
-    val fraudJenkinsJob = JenkinsJob(emptyQ, Config.jenkinsDelay, "fraud_jenkins")
-    val fraudStormWorker = Delay(Config.fraudProcessingTime, Config.fraudProcessingTime, false)
-    val fraudStormJob = StormJob(emptyQ, Seq(fraudStormWorker, fraudStormWorker), new StormDelay, "fraud_storm")
+    val fraudJenkinsJob = Job.fromConfig("fraud_jenkins", Config.numJenkinsWorkers, Config.jenkinsWorkerProcessingTime, Config.jenkinsDelay, 0)
+    val fraudStormJob = Job.fromConfig("fraud_storm", Config.numFraudWorkers, Config.fraudProcessingTime, 0)
 
-    val asJenkinsJob = JenkinsJob(emptyQ, Config.jenkinsDelay, "as_jenkins")
-    val asStormWorker = Delay(Config.assignSupplierProcessingTime, Config.assignSupplierProcessingTime, false)
-    val asStormJob = StormJob(emptyQ, Seq(asStormWorker, asStormWorker), new StormDelay, "as_storm")
-    val lastJob = JenkinsJob(emptyQ, Config.jenkinsDelay, "last_job")
+    val asJenkinsJob = Job.fromConfig("as_jenkins", Config.numJenkinsWorkers, Config.jenkinsWorkerProcessingTime, Config.jenkinsDelay, 0)
+    val asStormJob = Job.fromConfig("as_storm", Config.numAssignSupplierWorkers, Config.assignSupplierProcessingTime, 0)
+
+    val csJenkinsJob = Job.fromConfig("cs_jenkins", Config.numJenkinsWorkers, Config.jenkinsWorkerProcessingTime, Config.jenkinsDelay, 0)
+    val csStormJob = Job.fromConfig("cs_storm", Config.numConsolidateShippingWorkers, Config.consolidateShippingProcessingTime, 0)
+
+    val apoJenkinsJob = Job.fromConfig("apo_jenkins", Config.numJenkinsWorkers, Config.jenkinsWorkerProcessingTime, Config.jenkinsDelay, 0)
+    val apoJob = Job.fromConfig("apo_job", 1, Config.apoJobProcessingTime, 0)
+    val apoStorm = Job.fromConfig("apo_storm", Config.numApoWorkers, Config.apoProcessingTime, 0)
+
 
     val links = List(
-      Link(fraudJenkinsJob, List((.3f -> asJenkinsJob), (.7f -> fraudStormJob))),
-      Link(fraudStormJob, List(1f -> asJenkinsJob)),
+      Link(fraudJenkinsJob, List((.2f -> asJenkinsJob), (.8f -> fraudStormJob))),
+      Link(fraudStormJob, List((1f -> asJenkinsJob), (0f -> asStormJob))),
       Link(asJenkinsJob, List(1f -> asStormJob)),
-      Link(asJenkinsJob, List(1f -> asStormJob)),
-      Link(asStormJob, List(1f -> lastJob))
+      Link(asStormJob, List(1f -> csStormJob)),
+      Link(csStormJob, List(1f -> apoJenkinsJob)),
+      Link(apoJenkinsJob, List(1f -> apoJob))
     )
 
-    Pipeline.buildFromLinks(links)
+    Pipeline.buildFromLinks(links, fraudJenkinsJob)
   }
 
 
   def print(pipeline: Pipeline) {
-    println(pipeline.jobMap)
+    for (map <- pipeline.jobMap) {
+      println (map)
+
+    }
+    println("-")
   }
 
   def main(args: Array[String]) {
-    val pipeline = makePipeline()
-    print(pipeline)
-//    println(pipeline)
-    println(pipeline.tock)
+
+    val t = Pipeline.process(makePipeline(), Config.orderLoad)
+
+    t.toCSV()
+
   }
 }
