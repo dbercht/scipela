@@ -11,7 +11,7 @@ class QueueSpec extends FlatSpec {
     assert(incrementedQueue.currentSize == 9)
   }
 
-  It should "remove values" in {
+  it should "remove values" in {
     val queue = new Queue(6)
     val incrementedQueue = queue.remove(3);
     assert(incrementedQueue.currentSize == 3)

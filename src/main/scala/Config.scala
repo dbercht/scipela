@@ -21,7 +21,7 @@ object Config {
   val numApoWorkers = 4
 
   val pipelineStarttime = 0;
-    val pipelineEndtime = 86400;
+  val pipelineEndtime = 86400;
   val pipelineRuntime = 86400;
 
   val outputTraceFileName = "output_trace.csv";
