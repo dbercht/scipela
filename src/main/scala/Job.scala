@@ -21,16 +21,14 @@ class Job (val queue:Queue, val workers:Seq[Delay], val delay: Delay, val name:S
    * @return Activated Job
    */
   def activate: Job = {
-    var counter = 0;
     val w = workers.map( f=>
       if (!f.munching && (f.delayTime != 0) && ((queue.currentSize - counter) > 0) && delay.delayTimeLeft == 0) {
-//        counter += 1;
         f.munch
       } else {
         f
       }
     ).toSeq
-    new Job(queue.remove(counter), w, delay.munch, name)
+    new Job(queue, w, delay.munch, name)
   }
 
   /**
