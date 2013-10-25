@@ -22,7 +22,7 @@ class Job (val queue:Queue, val workers:Seq[Delay], val delay: Delay, val name:S
    */
   def activate: Job = {
     val w = workers.map( f=>
-      if (!f.munching && (f.delayTime != 0) && ((queue.currentSize - counter) > 0) && delay.delayTimeLeft == 0) {
+      if (!f.munching && (f.delayTime != 0) && (queue.currentSize > 0) && delay.delayTimeLeft == 0) {
         f.munch
       } else {
         f

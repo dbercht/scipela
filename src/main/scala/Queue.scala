@@ -6,10 +6,10 @@ case class Queue (val currentSize:Int) {
   }
 
   def remove(items: Int): Queue = {
-    if ((currentSize - items) < 0 ) {
-      new Queue(0)
-    } else {
-      new Queue(this.currentSize - items)
+    val newSize = currentSize - items
+    newSize match {
+      case i if i >= 0 => Queue(i)
+      case _ => Queue(0)
     }
   }
 }
