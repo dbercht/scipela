@@ -9,14 +9,14 @@ object Config {
   val numWorkers = 1
 
 
-  val pipelineStarttime = 0;
-  val pipelineEndtime = 86400;
+  val pipelineStarttime = 41000;
+  val pipelineEndtime = 42000;
   val pipelineRuntime = 86400;
 
   val outputTraceFileName = "output_trace.csv";
   val outputStatsFileName = "output_stats.csv";
 
-  val orderLoadVariation = .50f;
+  val orderLoadVariation = .80f;
   def orderLoad(time:Int): Int = {
     val rand = new Random();
 
