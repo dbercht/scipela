@@ -3,22 +3,11 @@ package simulator
 import java.util.Random
 
 object Config {
-  val jenkinsDelay = 150
-  val jenkinsWorkerProcessingTime = 0
-  val numJenkinsWorkers= 1
+  
+  val delay = 150
+  val processingTime = 0
+  val numWorkers = 1
 
-  val fraudProcessingTime = 6
-  val numFraudWorkers = 4
-
-  val assignSupplierProcessingTime = 4
-  val numAssignSupplierWorkers = 4
-
-  val consolidateShippingProcessingTime = 5
-  val numConsolidateShippingWorkers = 4
-
-  val apoProcessingTime = 3
-  val apoJobProcessingTime = 4
-  val numApoWorkers = 4
 
   val pipelineStarttime = 0;
   val pipelineEndtime = 86400;
@@ -32,7 +21,6 @@ object Config {
     val rand = new Random();
 
     def getLoadForTime(timeS: Int): Int = {
-      //      return Math.abs((rand.nextGaussian() + Config.pipelineRuntime/2)).toInt;
       var dist = timeS % Config.pipelineRuntime;
       if (dist > Config.pipelineRuntime/2) {
         dist = Config.pipelineRuntime - dist
