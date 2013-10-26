@@ -91,23 +91,26 @@ case class Pipeline (val jobMap: Map[String, Job],val linkMap: Map[String, List[
     val job = jobMap.get(head.name).get.feed(load)
     return updateJob(job)
   }
+
+  def getStats: Map[String, Int] = {
+    (jobMap.map(f => (f._2.name -> f._2.queue.currentSize)).toMap + ("usage" -> usage))
+  }
 }
 
 object Pipeline {
 
-  def process(pipeline: Pipeline, load: Int => Int) : Timeline = {
-    var t = new Timeline(pipeline.jobMap.map(f => f._2.name).toSeq);
-    t.addHeader("load");
-    t.addHeader("usage");
+  def process(pipeline: Pipeline, trace: Int => Int) : Timeline = {
+    val t = new Timeline;
+    t.addHeader("load")
+    t.addHeaders(Seq("usage") ++ pipeline.jobMap.map(f => f._2.name).toSeq)
 
     def processRec(pipeline: Pipeline, r: Int) :Pipeline =  {
       if (r == Config.pipelineEndtime) {
         return pipeline.tick.tock
       }
-      val currLoad = load(r);
-      t.register(r, pipeline.jobMap.map(f => (f._2.name -> f._2.queue.currentSize)).toMap);
+      val currLoad = trace(r);
+      t.register(r, pipeline.getStats);
       t.register(r, Map("load" -> currLoad));
-      t.register(r, Map("usage" -> pipeline.usage));
       pipeline.jobMap.map(f =>
         println(f)
       )

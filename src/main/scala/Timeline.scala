@@ -2,19 +2,20 @@ package simulator;
 import sys.process._
 import java.io.FileWriter
 
-class Timeline(var headers: Seq[String]) {
+class Timeline {
   var registrar:Map[Int, Map[String, Int]] = Map()
+  var headers: Seq[String] = Seq()
 
   def addHeader(header:String) {
     headers = headers :+ header
   }
 
+  def addHeaders(newHeaders:Seq[String]) {
+    headers = headers ++ newHeaders
+  }
+
   def register(timestamp:Int, data: Map[String, Int]) {
-    if (registrar.contains(timestamp)) {
-      registrar = registrar + (timestamp -> (registrar.getOrElse(timestamp, Map[String, Int]()) ++ data))
-    } else {
-      registrar = registrar + (timestamp -> data)
-    }
+    registrar = registrar + (timestamp -> (registrar.getOrElse(timestamp, Map[String, Int]()) ++ data))
   }
 
   def usageStats: Map[String, Double]= {
@@ -37,8 +38,6 @@ class Timeline(var headers: Seq[String]) {
 
   def toCSV() {
 
-    var sortedRegistrar = registrar.toSeq.sortBy(_._1)
-
     new FileWriter(Config.outputTraceFileName, false)
     val outputTraceFile = new FileWriter(Config.outputTraceFileName, true)
     outputTraceFile.write(headers.foldLeft(",")((a,b) => a + b + ","))
@@ -46,15 +45,11 @@ class Timeline(var headers: Seq[String]) {
       registrar.toSeq.sortBy(_._1).map( b =>
           outputTraceFile.write(headers.foldLeft("\n" + b._1 + ",")((x,y) => x + b._2.get(y).get + ","))
       )
-
     }
     finally outputTraceFile.close()
 
 
-
-    var outputStats:String = "average,stdDev\n";
-    outputStats += usageStats.get("avg").get + "," + usageStats.get("stdDev").get
-
+    val outputStats:String = "average,stdDev\n" + usageStats.get("avg").get + "," + usageStats.get("stdDev").get
 
     val outputStatsFile = new FileWriter(Config.outputStatsFileName, false)
     try {
