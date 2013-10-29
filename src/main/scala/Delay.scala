@@ -13,6 +13,3 @@ case class Delay (val delayTime:Int, val delayTimeLeft:Int, val munching:Boolean
   }
 }
 
-class JenkinsWorker extends Delay(0, 0, false)
-class StormDelay extends Delay(0, 0, false)
-

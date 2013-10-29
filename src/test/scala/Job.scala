@@ -32,4 +32,18 @@ class JobSpec extends FlatSpec {
 
     assert(fedJob.queue.currentSize == 0)
   }
+
+  it should "sum up the values of items to move on in a tock" in {
+    val job = new Job(Queue(10), Seq[Delay](Delay(10,0, true)), Delay(0, 0, true), "job_name")
+    val tockedJobSum = job.tockFeed
+
+    assert(tockedJobSum == 1)
+  }
+
+  it should "sum up all values of items to move on in a tock if delaytime is 0" in {
+    val job = new Job(Queue(10), Seq[Delay](Delay(0,0, true)), Delay(0, 0, true), "job_name")
+    val tockedJobSum = job.tockFeed
+
+    assert(tockedJobSum == 10)
+  }
 }

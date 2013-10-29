@@ -23,7 +23,7 @@ class Timeline {
 
     def squaredDifference(value1: Double, value2: Double) = pow(value1 - value2, 2.0)
 
-    def usage = registrar.map(f => f._2.get("usage").get.toDouble).toList
+    def usage = registrar.map(f => f._2("usage").toDouble).toList
     def avg:Double = usage.reduceLeft(_ + _) / usage.length
 
     def stdDev(list: List[Double], average: Double) = list.isEmpty match {
@@ -43,13 +43,13 @@ class Timeline {
     outputTraceFile.write(headers.foldLeft(",")((a,b) => a + b + ","))
     try {
       registrar.toSeq.sortBy(_._1).map( b =>
-          outputTraceFile.write(headers.foldLeft("\n" + b._1 + ",")((x,y) => x + b._2.get(y).get + ","))
+          outputTraceFile.write(headers.foldLeft("\n" + b._1 + ",")((x,y) => x + b._2(y) + ","))
       )
     }
     finally outputTraceFile.close()
 
 
-    val outputStats:String = "average,stdDev\n" + usageStats.get("avg").get + "," + usageStats.get("stdDev").get
+    val outputStats:String = "average,stdDev\n" + usageStats("avg") + "," + usageStats("stdDev")
 
     val outputStatsFile = new FileWriter(Config.outputStatsFileName, false)
     try {

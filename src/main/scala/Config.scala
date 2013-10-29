@@ -8,30 +8,30 @@ object Config {
   val processingTime = 0
   val numWorkers = 1
 
-  val pipelineStarttime = 41000;
-  val pipelineEndtime = 42000;
+  val pipelineStarttime = 45500;
+  val pipelineEndtime = 46000;
   val pipelineRuntime = 86400;
 
 
   val jobs = Map(
-    "step_1" -> Job.fromConfig("step_1", Config.numWorkers, Config.processingTime, Config.delay, 0),
-    "step_2" -> Job.fromConfig("step_2", 2, 4, 0, 0),
-    "step_3" -> Job.fromConfig("step_3", Config.numWorkers, Config.processingTime, Config.delay)
-    //      "step_4" -> Job.fromConfig("step_4", 2, 4, 0, 0)
+    "fraud_jenkins" -> Job.fromConfig("fraud_jenkins", Config.numWorkers, Config.processingTime, Config.delay, 0),
+    "fraud_storm" -> Job.fromConfig("fraud_storm", 4, 5, 0, 0)
+//    "as_jenkins" -> Job.fromConfig("as_jenkins", Config.numWorkers, Config.processingTime, Config.delay),
+//    "as_storm" -> Job.fromConfig("as_storm", 4, 4, 0, 0)
   )
 
   val links = Map[String, List[(Float, String)]](
-    "step_1" -> List((1f -> "step_2")),
-    "step_2" -> List((1f -> "step_3"))
-    //      "step_3" -> List((1f -> "step_4"))
+    "fraud_jenkins" -> List((1f -> "fraud_storm"))
+//    "fraud_storm" -> List((.9f -> "as_storm"), (.1f -> "as_jenkins"))
+//    "as_jenkins" -> List((1f -> "as_storm"))
   )
 
-  def head = jobs.get("step_1").get
+  def head = jobs.get("fraud_storm").get
 
   val outputTraceFileName = "output_trace.csv";
   val outputStatsFileName = "output_stats.csv";
 
-  val orderLoadVariation = .80f;
+  val orderLoadVariation = .70f;
   def orderLoad(time:Int): Int = {
     val rand = new Random();
 

@@ -25,15 +25,7 @@ case class Pipeline (val jobMap: Map[String, Job],val linkMap: Map[String, List[
     val jobSums = jobMap.foldLeft(Map[String, Int]()){(a, b) =>
       val job = b._2
       job.delay match {
-        case Delay(_, 0, _) =>
-          val sum = job.workers.foldLeft(0)((sum,worker) =>
-            worker match {
-              case Delay(0, 0, _) => sum + job.queue.currentSize
-              case Delay(_, 0, _) => sum + 1
-              case _ => sum
-            }
-          )
-          a + (b._1 -> (a.getOrElse(b._1, 0) + sum))
+        case Delay(_, 0, _) => a + (b._1 -> (a.getOrElse(b._1, 0) + job.tockFeed))
         case _ => a
       }
 
@@ -41,7 +33,7 @@ case class Pipeline (val jobMap: Map[String, Job],val linkMap: Map[String, List[
 
     val starvedJobs = jobSums.foldLeft(jobMap)((a,b) =>
       if (b._2 > 0 ) {
-         a + (b._1 -> jobMap.get(b._1).get.starve(b._2) )
+         a + (b._1 -> jobMap(b._1).starve(b._2) )
       } else {
         a
       }
@@ -49,7 +41,7 @@ case class Pipeline (val jobMap: Map[String, Job],val linkMap: Map[String, List[
 
     val fedJobs = starvedJobs.foldLeft(starvedJobs)((feedingJobs, job) => {
       linkMap.getOrElse(job._2.name, Seq()).foldLeft(feedingJobs)((feedingLinks, link) =>
-         feedingLinks + (feedingLinks.get(link._2).get.name -> feedingLinks.get(link._2).get.feed(round(link._1 * jobSums.getOrElse(job._2.name, 0)).toInt))
+         feedingLinks + (feedingLinks(link._2).name -> feedingLinks(link._2).feed(round(link._1 * jobSums.getOrElse(job._2.name, 0)).toInt))
         )
       }
     )
@@ -88,7 +80,7 @@ case class Pipeline (val jobMap: Map[String, Job],val linkMap: Map[String, List[
    * @return Pipeline with feeding
    */
   def feed(load: Int): Pipeline = {
-    val job = jobMap.get(head.name).get.feed(load)
+    val job = jobMap(head.name).feed(load)
     return updateJob(job)
   }
 
@@ -112,7 +104,7 @@ object Pipeline {
       t.register(r, pipeline.getStats);
       t.register(r, Map("load" -> currLoad));
       pipeline.jobMap.map(f =>
-        println(f)
+        println(f._2)
       )
 
       processRec(pipeline.feed(currLoad).tick.tock, r + 1)

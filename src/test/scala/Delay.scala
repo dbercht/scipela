@@ -1,6 +1,6 @@
 package test.scala.delay
 
-import simulator.{Delay, StormDelay}
+import simulator.{Delay}
 import org.scalatest._
 
 class DelaySpec extends FlatSpec {
@@ -23,12 +23,5 @@ class DelaySpec extends FlatSpec {
     val delayMunching = delay.decrement
     assert(delayMunching.delayTimeLeft === delay.delayTimeLeft - 1)
     assert(delayMunching.munching)
-  }
-}
-class StormDelaySpec extends FlatSpec {
-  "A storm delay" should "have zero delay" in {
-    val delay = new StormDelay()
-    val delayNotMunching = delay.decrement
-    assert(delayNotMunching.delayTimeLeft === delay.delayTime)
   }
 }
