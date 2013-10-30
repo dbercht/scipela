@@ -101,8 +101,8 @@ object Pipeline {
       pipeline.jobMap.map(f =>
         println(f._2)
       )
-
-      processRec(pipeline.feed(currLoad).tick.tock, r + 1)
+      Thread.sleep(Config.delayTime)
+      processRec(pipeline.tick.tock.feed(currLoad), r + 1)
     }
     processRec(pipeline, Config.pipelineStarttime)
     return t

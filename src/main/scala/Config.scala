@@ -4,17 +4,18 @@ import java.util.Random
 
 object Config {
   
-  val delay = 150
+  val delay = 15
   val processingTime = 0
   val numWorkers = 1
 
   val pipelineStarttime = 45500;
-  val pipelineEndtime = 46000;
+  val pipelineEndtime = 45750;
   val pipelineRuntime = 86400;
 
+  val delayTime = 0;
 
   val jobs = Map(
-    "fraud_jenkins" -> Job.fromConfig("fraud_jenkins", Config.numWorkers, Config.processingTime, Config.delay, 75),
+    "fraud_jenkins" -> Job.fromConfig("fraud_jenkins", Config.numWorkers, Config.processingTime, Config.delay),
     "fraud_storm" -> Job.fromConfig("fraud_storm", 4, 5, 0, 0),
     "as_jenkins" -> Job.fromConfig("as_jenkins", Config.numWorkers, Config.processingTime, Config.delay)
 //    "as_storm" -> Job.fromConfig("as_storm", 4, 4, 0, 0)

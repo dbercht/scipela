@@ -20,7 +20,7 @@ shift5(x) = (back5 = back4, back4 = back3, back3 = back2, back2 = back1, back1 =
 #
 init(x) = (back1 = back2 = back3 = back4 = back5 = sum = 0)
 
-set yrange [-5:]
+set yrange [-1:]
 
 plot datafile using 1:4 with lines,\
 datafile using 1:5 with lines,\
