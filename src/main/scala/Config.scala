@@ -14,24 +14,32 @@ object Config {
 
 
   val jobs = Map(
-    "fraud_jenkins" -> Job.fromConfig("fraud_jenkins", Config.numWorkers, Config.processingTime, Config.delay, 0),
-    "fraud_storm" -> Job.fromConfig("fraud_storm", 4, 5, 0, 0)
-//    "as_jenkins" -> Job.fromConfig("as_jenkins", Config.numWorkers, Config.processingTime, Config.delay),
+    "fraud_jenkins" -> Job.fromConfig("fraud_jenkins", Config.numWorkers, Config.processingTime, Config.delay, 75),
+    "fraud_storm" -> Job.fromConfig("fraud_storm", 4, 5, 0, 0),
+    "as_jenkins" -> Job.fromConfig("as_jenkins", Config.numWorkers, Config.processingTime, Config.delay)
 //    "as_storm" -> Job.fromConfig("as_storm", 4, 4, 0, 0)
   )
 
   val links = Map[String, List[(Float, String)]](
-    "fraud_jenkins" -> List((1f -> "fraud_storm"))
-//    "fraud_storm" -> List((.9f -> "as_storm"), (.1f -> "as_jenkins"))
+    "fraud_jenkins" -> List((1f -> "fraud_storm")),
+    "fraud_storm" -> List((1f -> "as_jenkins"))
 //    "as_jenkins" -> List((1f -> "as_storm"))
   )
 
-  def head = jobs.get("fraud_storm").get
+  def head = jobs.get("fraud_jenkins").get
 
   val outputTraceFileName = "output_trace.csv";
   val outputStatsFileName = "output_stats.csv";
 
   val orderLoadVariation = .70f;
+
+  def orderLoads(time: Int): Int = {
+    time % 5 match {
+      case 0 => 1
+      case _ => 0
+    }
+  }
+
   def orderLoad(time:Int): Int = {
     val rand = new Random();
 

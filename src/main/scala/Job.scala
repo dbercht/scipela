@@ -19,7 +19,7 @@ class Job (val queue:Queue, val workers:Seq[Delay], val delay: Delay, val name:S
   def tockFeed: Int = {
     workers.foldLeft(0)((sum,worker) =>
       worker match {
-        case Delay(0, _, _) => sum + queue.currentSize
+        case Delay(0, _, _) => queue.currentSize
         case Delay(_, 0, _) => sum + 1
         case _ => sum
       }
@@ -35,9 +35,9 @@ class Job (val queue:Queue, val workers:Seq[Delay], val delay: Delay, val name:S
    * @return Activated Job
    */
   def activate: Job = {
-    var count = 0;
+    var count = activeWorkers;
     val w = workers.map( f=>
-      if (!f.munching && (f.delayTime != 0) && (queue.currentSize - count > 0) && delay.delayTimeLeft == 0) {
+      if (!f.munching && (f.delayTime != 0) && (queue.currentSize > count) && delay.delayTimeLeft == 0) {
         count += 1
         f.munch
       } else {
@@ -67,6 +67,20 @@ class Job (val queue:Queue, val workers:Seq[Delay], val delay: Delay, val name:S
     new Job(queue.remove(items), workers, delay, name)
   }
 
+  /**
+   * Calculates number of current active workers
+   *
+   * @return Int
+   */
+  def activeWorkers: Int = {
+    workers.foldLeft(0)((cSum, worker) =>
+      worker match {
+        case Delay(_, _, true) => cSum + 1
+        case _ => cSum
+      }
+    )
+  }
+
   override def toString():String = {
     val workerStat = workers.foldLeft("")(_+"\t" + ":" + _.delayTimeLeft)
     return "\t" + name + "\t" + delay.delayTimeLeft + "\t" + queue.currentSize+ workerStat
@@ -75,8 +89,8 @@ class Job (val queue:Queue, val workers:Seq[Delay], val delay: Delay, val name:S
 }
 
 object Job {
-  def fromConfig(name:String, numWorkers: Int, workerProcessingTime:Int, delay: Int, queueSize:Int = 0) :Job = {
+  def fromConfig(name:String, numWorkers: Int, workerProcessingTime:Int, delay: Int, delayTimeOffset: Int = 0, queueSize:Int = 0) :Job = {
     val workers = for (i <- List.range(0, numWorkers) ) yield Delay(workerProcessingTime, workerProcessingTime, false)
-    new Job(new Queue(queueSize), workers, Delay(delay, delay, false), name)
+    new Job(new Queue(queueSize), workers, Delay(delay, delayTimeOffset, true), name)
   }
 }

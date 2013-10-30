@@ -55,12 +55,7 @@ case class Pipeline (val jobMap: Map[String, Job],val linkMap: Map[String, List[
    */
   def usage: Int =  {
     jobMap.foldLeft(0)((sum, job) =>
-      job._2.workers.foldLeft(sum)((cSum, worker) =>
-        worker match {
-          case Delay(_, _, true) => cSum + 1
-          case _ => cSum
-        }
-      )
+      job._2.activeWorkers + sum
     )
   }
 
